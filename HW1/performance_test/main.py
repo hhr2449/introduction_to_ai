@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument(
         "--alpha",
         type=float,
-        default=0.1,
+        default=0.05,
         help="加法平滑参数"
     )
 
@@ -99,9 +99,6 @@ def build_corpus(model, corpus_paths, pinyin_path, valid_char_table_path):
 def main():
     # 解析参数
     args = parse_args()
-    # ========统计生成词频表的时间==========
-    train_start = time.perf_counter()
-    # ==================================== 
     # 创建语料类
     corpus = build_corpus(
                         model=args.model,
@@ -110,16 +107,6 @@ def main():
                         valid_char_table_path="./data/一二级汉字表.txt"
                         )
     
-    # ==============输出日志到log.txt=================
-    train_end = time.perf_counter()
-    train_time = train_end - train_start
-    with open('./data/log.txt', 'a', encoding='utf-8') as f:
-        print(f"[INFO] 生成词频表时间: {train_time:.4f} 秒", file=f)
-        print(f"[INFO] 单字表条目数: {len(corpus.uniword_table)}", file=f)
-        print(f"[INFO] 二元表条目数: {len(corpus.bigram_table)}", file=f)
-        if args.model == "3g":
-            print(f"[INFO] 三元表条目数: {len(corpus.trigram_table)}", file=f)
-    # ===============================================
     
     # 创建解码器
     parser = build_parser(
@@ -129,21 +116,14 @@ def main():
     
 
     # 读取标准输入
-    use_time = 0
     for pinyin_line in sys.stdin:
         pinyin_line = pinyin_line.strip()
 
         if not pinyin_line:
             print("")
             continue
-        start = time.perf_counter()
         print(parser.parser_pinyin_string(pinyin_line))
-        end = time.perf_counter()
-        dtime = end - start
-        use_time += dtime
-    
-    with open('./data/log.txt', 'a', encoding='utf-8') as f:
-            print(f"[INFO] 生成测试样例时间: {use_time:.4f} 秒", file=f)
+
 
 
 if __name__ == "__main__":

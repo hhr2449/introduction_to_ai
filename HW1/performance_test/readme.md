@@ -11,12 +11,14 @@
 python main.py < data/input.txt > data/output.txt
 ```
 
-### 2.运行环境
+## 2.运行环境
+
 - 操作系统：WSL2
 - Python 版本：Python 3
 - 第三方依赖：无额外安装包，可直接使用 Python 标准库运行
 
-### 3.项目结构
+## 3.项目结构
+
 ```
 项目根目录/
 ├─ corpus/                    # 语料库
@@ -28,40 +30,35 @@ python main.py < data/input.txt > data/output.txt
 │  └─ 一二级汉字表.txt
 ├─ src/
 │  ├─ __init__.py
-│  ├─ train.py               # 训练与频数统计
-│  ├─ model.py               # 二元模型与 Viterbi 解码
+│  ├─ train_2g.py               # 二元模型训练与频数统计
+│  ├─ model_2g.py               # 二元模型概率计算与 Viterbi 解码
+│  ├─ model_3g.py               # 三元模型概率计算与 Viterbi 解码 
+|  ├─ train_3g.py               # 三元模型训练与频数统计  
 │  └─ eval.py                # 本地评测脚本
 ├─ main.py                   # 主程序入口
 ├─ requirements.txt
 └─ README.md
 ```
 
-项目主流程为：
-```
-main.py
-  -> src/train.py 读取语料并统计频数
-  -> src/model.py 进行二元模型解码
-  -> src/eval.py 本地计算字准确率和句准确率
-```
-### 4.各文件说明
+## 4.各文件说明
 
 1. main.py
-  主程序入口。负责：
+    主程序入口。负责：
   - 创建语料对象
   - 创建解码器
   - 从标准输入逐行读取拼音
   - 将预测结果输出到标准输出
 2. src/train.py
-  训练模块。负责：
+    训练模块。负责：
   - 读取拼音汉字表
   - 读取一二级汉字表
   - 遍历训练语料
-  - 统计单字频数和二元频数
+  - 统计单字频数和二元频数(如果是3g版本还会统计三元频数)
 
 
 3. src/model.py
-  模型模块。负责：
-  - 计算一元概率和二元条件概率
+    模型模块。负责：
+  - 计算一元概率和二元条件概率（三元概率）
   - 使用计算转移代价
   - 使用 Viterbi 算法寻找最优汉字路径
 
@@ -113,13 +110,71 @@ python main.py < data/input.txt > data/output.txt
 程序支持以下命令行参数：
 
 ```bash
-python main.py [--model {bigram,trigram}] [--alpha ALPHA] [--lam LAM]
+python main.py [-h] [--model {2g,3g}] [--alpha ALPHA] [--lam LAM] [--lam1 LAM1] [--lam2 LAM2] [--lam3 LAM3]
 ```
 
 参数说明：
 
-- --model：选择模型类型
-  - --model bigram：使用字级二元模型（默认）
-  - --model trigram：使用字级三元模型
-- --alpha：输入加法平滑参数
-- --lam：输入插值参数
+- --model {2g,3g}：选择模型类型
+
+  2g：二元模型
+
+  3g：三元模型
+
+  默认通常为二元模型
+
+- --alpha ALPHA：平滑参数
+
+  二元模型和三元模型都可用
+
+- --lam LAM：二元模型中二元概率的插值权重
+
+- --lam1 LAM1：三元模型中一元概率权重
+
+- --lam2 LAM2：三元模型中二元概率权重
+
+- --lam3 LAM3：三元模型中三元概率权重
+
+
+
+### 示例
+
+#### 运行二元模型
+
+```
+python main.py --model 2g --alpha 0.05 --lam 0.997 < data/input.txt > data/output.txt
+```
+
+#### 运行三元模型
+
+```
+python main.py --model 3g --alpha 0.05 --lam1 0.05 --lam2 0.20 --lam3 0.75 < data/input.txt > data/output.txt
+```
+
+## 6.评测脚本
+
+### 6.1 基础评测
+
+运行基础评测脚本：
+
+```
+python src/eval.py
+```
+
+基础评测输出：
+
+- 字准确率
+- 句准确率
+
+6.2 补充评测
+
+```
+python src/extra_eval.py
+```
+
+补充评测指标包括：
+
+- CER（字符错误率）
+- AED（平均句编辑距离）
+- WES（错误句平均错误字数）
+- LMR（句长匹配率）
