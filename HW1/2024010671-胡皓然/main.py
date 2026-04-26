@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument(
         "--lam",
         type=float,
-        default=0.9,
+        default=0.997,
         help="二元模型插值参数"
     )
 
@@ -47,13 +47,13 @@ def parse_args():
     parser.add_argument(
         "--lam2", 
         type=float, 
-        default=0.10, 
+        default=0.20, 
         help="三元模型二元回退权重"
         )
     parser.add_argument(
         "--lam3", 
         type=float, 
-        default=0.85, 
+        default=0.75, 
         help="三元模型三元权重"
         )
 

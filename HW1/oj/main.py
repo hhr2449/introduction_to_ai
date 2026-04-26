@@ -104,7 +104,7 @@ class PinyinCorpus:
         return self.bi_count
         
 class ProbCalculator:
-    def __init__(self, corpus, lam=0.98):
+    def __init__(self, corpus, lam=0.997):
         self.corpus = corpus
         # 插值系数，默认为0.98
         self.lam = lam
@@ -207,7 +207,7 @@ def viterbi(pinyinList, corpus, calculator):
 def main():
     # 创建数据类
     corpus = PinyinCorpus('./word2pinyin.txt', './1_word.txt', './2_word.txt')
-    calculator = ProbCalculator(corpus, lam=0.9)
+    calculator = ProbCalculator(corpus, lam=0.997)
     
     # 逐行读取标准输入并进行评测
     for line in sys.stdin:

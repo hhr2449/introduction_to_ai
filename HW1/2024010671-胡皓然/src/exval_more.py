@@ -24,9 +24,9 @@ def levenshtein(a: str, b: str) -> int:
 def extra_evaluate(output_path=None, answer_path=None):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if output_path is None:
-        output_path = os.path.join(base_dir, 'performance_test', 'data', 'output.txt')
+        output_path = os.path.join(base_dir,'data', 'output.txt')
     if answer_path is None:
-        answer_path = os.path.join(base_dir, 'performance_test', 'data', 'answer.txt')
+        answer_path = os.path.join(base_dir,'data', 'answer.txt')
 
     outputs = read_file(output_path)
     answers = read_file(answer_path)

@@ -207,3 +207,9 @@ marimo/_lsp/
 __marimo__/
 
 **/corpus/*
+wiki_zh
+SMP2020
+data
+*.zip
+*.txt
+experiments

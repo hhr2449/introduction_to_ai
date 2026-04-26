@@ -91,12 +91,12 @@ bei jing da xue
 本实验中，拼音表、一二级汉字表以及训练语料为 GBK 编码，因此程序在读取这些文件时显式使用 encoding='gbk'。
 程序输出结果文件 data/output.txt 按 UTF-8 编码生成
 
-## 5. 运行方式
+## 6. 运行方式
 
 本项目的主程序入口为 `main.py`。  
 在项目根目录下运行时，程序会默认执行基于字的二元模型，读取标准输入中的拼音序列，并将转换结果输出到标准输出。
 
-### 5.1 默认运行命令
+### 6.1 默认运行命令
 
 在项目根目录下执行：
 
@@ -105,7 +105,7 @@ python main.py < data/input.txt > data/output.txt
 ```
 在不添加任何命令行参数时，程序默认执行的是基于字的二元模型
 
-### 5.2 可选参数说明
+### 6.2 可选参数说明
 
 程序支持以下命令行参数：
 
@@ -151,9 +151,9 @@ python main.py --model 2g --alpha 0.05 --lam 0.997 < data/input.txt > data/outpu
 python main.py --model 3g --alpha 0.05 --lam1 0.05 --lam2 0.20 --lam3 0.75 < data/input.txt > data/output.txt
 ```
 
-## 6.评测脚本
+## 7.评测脚本
 
-### 6.1 基础评测
+### 7.1 基础评测
 
 运行基础评测脚本：
 
@@ -166,7 +166,7 @@ python src/eval.py
 - 字准确率
 - 句准确率
 
-6.2 补充评测
+### 7.2 补充评测
 
 ```
 python src/extra_eval.py
