@@ -4,6 +4,7 @@ import os
 import torch
 import torch.nn as nn
 import argparse
+import torch.nn.init as init
 
 from tqdm import tqdm
 
@@ -22,6 +23,84 @@ from config.base_config import (
 )
 
 from utils import set_seed
+
+
+def str2bool(value):
+    if isinstance(value, bool):
+        return value
+    value = value.lower()
+    if value in {"true", "1", "yes", "y"}:
+        return True
+    if value in {"false", "0", "no", "n"}:
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
+
+
+def override_config_from_args(args, config):
+    common_overrides = {
+        "BATCH_SIZE": args.batch_size,
+        "LEARNING_RATE": args.learning_rate,
+        "DROPOUT": args.dropout,
+        "WEIGHT_DECAY": args.weight_decay,
+        "MAX_SENTENCE_LEN": args.max_len,
+        "EPOCHS": args.epochs,
+        "PATIENCE": args.patience,
+    }
+    for key, value in common_overrides.items():
+        if value is not None:
+            setattr(config, key, value)
+
+    if args.init_method is not None:
+        setattr(config, "INIT_METHOD", args.init_method)
+
+    if args.model == "textcnn":
+        if args.num_filters is not None:
+            config.NUM_FILTERS = args.num_filters
+        if args.filter_sizes is not None:
+            config.FILTER_SIZES = args.filter_sizes
+
+    if args.model == "rnn_lstm":
+        if args.hidden_size is not None:
+            config.HIDDEN_SIZE = args.hidden_size
+        if args.num_layers is not None:
+            config.NUM_LAYERS = args.num_layers
+        if args.bidirectional is not None:
+            config.BIDIRECTIONAL = args.bidirectional
+
+    return config
+
+
+def init_module_weights(module, init_method):
+    if isinstance(module, (nn.Linear, nn.Conv1d, nn.Conv2d, nn.Conv3d)):
+        if init_method == "xavier":
+            init.xavier_uniform_(module.weight)
+        elif init_method == "kaiming":
+            init.kaiming_uniform_(module.weight, nonlinearity="relu")
+        elif init_method == "orthogonal":
+            init.orthogonal_(module.weight)
+        elif init_method == "normal":
+            init.normal_(module.weight, mean=0.0, std=0.02)
+        if module.bias is not None:
+            init.zeros_(module.bias)
+    elif isinstance(module, (nn.LSTM, nn.GRU, nn.RNN)):
+        for name, param in module.named_parameters():
+            if "weight_ih" in name or "weight_hh" in name:
+                if init_method == "xavier":
+                    init.xavier_uniform_(param)
+                elif init_method == "kaiming":
+                    init.kaiming_uniform_(param, nonlinearity="relu")
+                elif init_method == "orthogonal":
+                    init.orthogonal_(param)
+                elif init_method == "normal":
+                    init.normal_(param, mean=0.0, std=0.02)
+            elif "bias" in name:
+                init.zeros_(param)
+
+
+def apply_initialization(model, init_method):
+    if init_method == "default":
+        return
+    model.apply(lambda module: init_module_weights(module, init_method))
 
         
 def train_one_epoch(model, data_loader, criterion, optimizer, device):
@@ -115,11 +194,17 @@ def build_experiment_config(args, config):
         "weight_decay": config.WEIGHT_DECAY,
         "dropout": config.DROPOUT,
         "batch_size": config.BATCH_SIZE,
+        "max_len": config.MAX_SENTENCE_LEN,
         "patience": config.PATIENCE,
+        "init_method": getattr(config, "INIT_METHOD", "default"),
     }
     if args.model == "textcnn":
         experiment_config["num_filters"] = config.NUM_FILTERS
         experiment_config["filter_sizes"] = config.FILTER_SIZES
+    if args.model == "rnn_lstm":
+        experiment_config["hidden_size"] = config.HIDDEN_SIZE
+        experiment_config["num_layers"] = config.NUM_LAYERS
+        experiment_config["bidirectional"] = config.BIDIRECTIONAL
     return experiment_config
 
 
@@ -135,6 +220,24 @@ def main():
     parser.add_argument("--model", type=str, required=True, choices=["mlp", "textcnn", "rnn_lstm"])
     # 实验名称
     parser.add_argument("--exp_name", type=str, required=True)
+    parser.add_argument("--batch_size", type=int, default=None)
+    parser.add_argument("--learning_rate", type=float, default=None)
+    parser.add_argument("--dropout", type=float, default=None)
+    parser.add_argument("--weight_decay", type=float, default=None)
+    parser.add_argument("--max_len", type=int, default=None)
+    parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--patience", type=int, default=None)
+    parser.add_argument("--num_filters", type=int, default=None)
+    parser.add_argument("--filter_sizes", type=int, nargs="+", default=None)
+    parser.add_argument("--hidden_size", type=int, default=None)
+    parser.add_argument("--num_layers", type=int, default=None)
+    parser.add_argument("--bidirectional", type=str2bool, default=None)
+    parser.add_argument(
+        "--init_method",
+        type=str,
+        choices=["default", "xavier", "kaiming", "orthogonal", "normal"],
+        default=None,
+    )
     args = parser.parse_args()
     print(f"Training model: {args.model}")
     print(f"Experiment name: {args.exp_name}")
@@ -151,6 +254,7 @@ def main():
         import config.rnn_config as config
     else:
         raise ValueError(f"Unsupported model: {args.model}")
+    config = override_config_from_args(args, config)
 
     # 实验结果保存路径
     experiment_dir = os.path.join(RESULT_DIR, args.model, args.exp_name)
@@ -169,7 +273,8 @@ def main():
 
     # 获取DataLoader
     train_loader, valid_loader, test_loader, word2id, _, embedding_matrix = get_data_loaders(
-        batch_size=config.BATCH_SIZE
+        batch_size=config.BATCH_SIZE,
+        max_len=config.MAX_SENTENCE_LEN,
     )
 
     if args.model == "mlp":
@@ -178,6 +283,7 @@ def main():
             pad_idx=word2id[PAD_TOKEN],
             embedding_matrix=embedding_matrix,
             freeze_embedding=False,
+            dropout=config.DROPOUT,
         ).to(DEVICE)
     elif args.model == "textcnn":
         model = TextCNN(
@@ -185,6 +291,9 @@ def main():
             pad_idx=word2id[PAD_TOKEN],
             embedding_matrix=embedding_matrix,
             freeze_embedding=False,
+            num_filters=config.NUM_FILTERS,
+            filter_sizes=config.FILTER_SIZES,
+            dropout=config.DROPOUT,
         ).to(DEVICE)
     elif args.model == "rnn_lstm":
         model = RNN_LSTM(
@@ -192,8 +301,12 @@ def main():
             pad_idx=word2id[PAD_TOKEN],
             embedding_matrix=embedding_matrix,
             freeze_embedding=False,
+            hidden_size=config.HIDDEN_SIZE,
+            num_layers=config.NUM_LAYERS,
+            dropout=config.DROPOUT,
+            bidirectional=config.BIDIRECTIONAL,
         ).to(DEVICE)
-        
+    apply_initialization(model, getattr(config, "INIT_METHOD", "default"))
 
     # 创建损失函数和优化器
     # 交叉熵损失函数

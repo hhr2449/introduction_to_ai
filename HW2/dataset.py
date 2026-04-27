@@ -68,9 +68,8 @@ def build_vocab(data, mini_freq=1):
 # word2id，定义参照build_vocab()
 # 输出一个二元组的列表，其中的每个二元组都表示一条训练数据，具体而言是：(label, sentence_ids)
 # sentence_ids是一个列表，列表中的每个元素表示一个单词的id，长度为MAX_SENTENCE_LEN
-def convert_data_to_id(data, word2id):
+def convert_data_to_id(data, word2id, max_len=MAX_SENTENCE_LEN):
     data_ids = []
-    max_len = MAX_SENTENCE_LEN
     pad_id = word2id['<PAD>']
     unk_id = word2id['<UNK>']
 
@@ -127,7 +126,7 @@ def build_embedding_matrix(word2id, word2vec_path=WORD2VEC_PATH, embedding_dim=E
 
 
 
-def get_data_loaders(batch_size=BATCH_SIZE):
+def get_data_loaders(batch_size=BATCH_SIZE, max_len=MAX_SENTENCE_LEN):
     # 读取数据
     train_data = read_data_from_file(TRAIN_DATA_PATH)
     valid_data = read_data_from_file(VALID_DATA_PATH)
@@ -137,14 +136,14 @@ def get_data_loaders(batch_size=BATCH_SIZE):
     # 只使用训练数据中的词
     word2id, id2word = build_vocab(train_data)
     # 将数据转换为id表示
-    train_data_ids = convert_data_to_id(train_data, word2id)
-    valid_data_ids = convert_data_to_id(valid_data, word2id)
-    test_data_ids = convert_data_to_id(test_data, word2id)
+    train_data_ids = convert_data_to_id(train_data, word2id, max_len=max_len)
+    valid_data_ids = convert_data_to_id(valid_data, word2id, max_len=max_len)
+    test_data_ids = convert_data_to_id(test_data, word2id, max_len=max_len)
 
     # 实例化Dataset
-    train_dataset = SentimentDataset(train_data_ids, word2id)
-    valid_dataset = SentimentDataset(valid_data_ids, word2id)
-    test_dataset = SentimentDataset(test_data_ids, word2id)
+    train_dataset = SentimentDataset(train_data_ids, word2id, max_len=max_len)
+    valid_dataset = SentimentDataset(valid_data_ids, word2id, max_len=max_len)
+    test_dataset = SentimentDataset(test_data_ids, word2id, max_len=max_len)
 
     # 实例化DataLoader
     # 需要输入Dataset和batch_size，shuffle表示是否打乱数据,这里只选择训练数据打乱

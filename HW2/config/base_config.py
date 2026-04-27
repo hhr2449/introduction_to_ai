@@ -23,6 +23,7 @@ LEARNING_RATE = 1e-3
 EPOCHS = 20
 DROPOUT = 0.5
 WEIGHT_DECAY = 1e-4
+INIT_METHOD = "default"
 
 # 设备
 # 检查如果有可用的GPU，则使用GPU，否则使用CPU
