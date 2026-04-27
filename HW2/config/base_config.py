@@ -11,7 +11,7 @@ WORD2VEC_PATH = 'Dataset/wiki_word2vec_50.bin'
 # ===================== 基本参数 ======================
 SEED = 42
 # 句子长度，如果句子长度超过该值，则截断，否则填充
-MAX_SENTENCE_LEN = 100
+MAX_SENTENCE_LEN = 120
 # 词向量的维度
 EMBEDDING_DIM = 50
 # 类数
@@ -22,7 +22,7 @@ BATCH_SIZE = 64
 LEARNING_RATE = 1e-3
 EPOCHS = 20
 DROPOUT = 0.5
-WEIGHT_DECAY = 0.0
+WEIGHT_DECAY = 1e-4
 
 # 设备
 # 检查如果有可用的GPU，则使用GPU，否则使用CPU

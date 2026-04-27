@@ -127,7 +127,7 @@ def build_embedding_matrix(word2id, word2vec_path=WORD2VEC_PATH, embedding_dim=E
 
 
 
-def get_data_loaders():
+def get_data_loaders(batch_size=BATCH_SIZE):
     # 读取数据
     train_data = read_data_from_file(TRAIN_DATA_PATH)
     valid_data = read_data_from_file(VALID_DATA_PATH)
@@ -148,9 +148,9 @@ def get_data_loaders():
 
     # 实例化DataLoader
     # 需要输入Dataset和batch_size，shuffle表示是否打乱数据,这里只选择训练数据打乱
-    train_data_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    valid_data_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    test_data_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    train_data_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    valid_data_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
+    test_data_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # 构建词向量矩阵
     embedding_matrix = build_embedding_matrix(word2id)
