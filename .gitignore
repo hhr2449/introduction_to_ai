@@ -214,3 +214,15 @@ data
 *.txt
 experiments
 Dataset
+
+__pycache__/
+*.pyc
+
+checkpoints/
+results/
+logs/
+*.pt
+*.pth
+
+.env
+.ipynb_checkpoints/
