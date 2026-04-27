@@ -21,7 +21,7 @@ from config.mlp_config import (
     USE_EARLY_STOPPING,
     PATIENCE,
 )
-from HW2.utils import set_seed
+from utils import set_seed
 
 
 def train_one_epoch(model, data_loader, criterion, optimizer, device):

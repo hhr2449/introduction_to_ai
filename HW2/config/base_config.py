@@ -5,7 +5,7 @@ import torch
 # ===================== 数据路径 =====================
 TRAIN_DATA_PATH = 'Dataset/train.txt'
 TEST_DATA_PATH = 'Dataset/test.txt'
-VALID_DATA_PATH = 'Dataset/valid.txt'
+VALID_DATA_PATH = 'Dataset/validation.txt'
 WORD2VEC_PATH = 'Dataset/wiki_word2vec_50.bin'
 
 # ===================== 基本参数 ======================
@@ -36,3 +36,5 @@ MIN_DELTA = 0.0
 # ========= 输出目录 =========
 CHECKPOINT_DIR = "checkpoints"
 RESULT_DIR = "results"
+
+PAD_TOKEN = "<PAD>"

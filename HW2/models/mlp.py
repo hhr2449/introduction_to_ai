@@ -25,6 +25,9 @@ class MLP(nn.Module):
     ):
         super().__init__()
         self.pad_idx = pad_idx
+        # 如果传入的是 numpy.ndarray，先转成 torch.FloatTensor
+        if embedding_matrix is not None and not isinstance(embedding_matrix, torch.Tensor):
+            embedding_matrix = torch.tensor(embedding_matrix, dtype=torch.float)
 
         # 词嵌入层
         # 将输入的id列表转换为词向量列表
@@ -72,4 +75,5 @@ class MLP(nn.Module):
         # 经过第二个全连接
         x = self.fc2(x)
         # 不再做softmax了，直接使用nn.CrossEntropyLoss()损失函数，它会先做softmax再计算损失
+        return x
 

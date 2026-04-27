@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-from HW2.config.base_config import (
+from config.base_config import (
     BATCH_SIZE,
     MAX_SENTENCE_LEN,
     TRAIN_DATA_PATH,
@@ -120,8 +120,8 @@ def build_embedding_matrix(word2id, word2vec_path=WORD2VEC_PATH, embedding_dim=E
     embedding_matrix[pad_idx] = np.zeros((embedding_dim,))
     # 遍历词表，进行填充
     for word, i in word2id.items():
-        if word in word2vec.vocab:
-            embedding_matrix[i] = word2vec.word_vec(word)
+        if word in word2vec:
+            embedding_matrix[i] = word2vec[word]
 
     return embedding_matrix
 
