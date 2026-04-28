@@ -10,10 +10,14 @@ NUM_FILTERS = 100
 # 卷积核的大小
 FILTER_SIZES = [3, 4, 5]
 
-# ========= CNN训练参数 =========
+# ========= TextCNN最优默认参数 =========
+BATCH_SIZE = 32
 LEARNING_RATE = 1e-3
 DROPOUT = 0.5
 WEIGHT_DECAY = 1e-4
+MAX_SENTENCE_LEN = 60
+EPOCHS = 15
+INIT_METHOD = "default"
 
 # ========= 早停参数 =========
 USE_EARLY_STOPPING = True

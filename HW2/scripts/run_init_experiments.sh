@@ -4,30 +4,30 @@ set -e
 # =========================
 # MLP init
 # =========================
-python -m train.train --model mlp --exp_name mlp_init_default --init_method default
-python -m train.train --model mlp --exp_name mlp_init_xavier --init_method xavier
-python -m train.train --model mlp --exp_name mlp_init_kaiming --init_method kaiming
-python -m train.train --model mlp --exp_name mlp_init_normal --init_method normal
+python3 -m train.train --model mlp --exp_name mlp_init_default --init_method default
+python3 -m train.train --model mlp --exp_name mlp_init_xavier --init_method xavier
+python3 -m train.train --model mlp --exp_name mlp_init_kaiming --init_method kaiming
+python3 -m train.train --model mlp --exp_name mlp_init_normal --init_method normal
 
 # =========================
 # TextCNN init
 # =========================
-python -m train.train --model textcnn --exp_name textcnn_init_default \
+python3 -m train.train --model textcnn --exp_name textcnn_init_default \
   --batch_size 64 --learning_rate 1e-3 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --num_filters 100 --filter_sizes 3 4 5 --init_method default
 
-python -m train.train --model textcnn --exp_name textcnn_init_xavier \
+python3 -m train.train --model textcnn --exp_name textcnn_init_xavier \
   --batch_size 64 --learning_rate 1e-3 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --num_filters 100 --filter_sizes 3 4 5 --init_method xavier
 
-python -m train.train --model textcnn --exp_name textcnn_init_kaiming \
+python3 -m train.train --model textcnn --exp_name textcnn_init_kaiming \
   --batch_size 64 --learning_rate 1e-3 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --num_filters 100 --filter_sizes 3 4 5 --init_method kaiming
 
-python -m train.train --model textcnn --exp_name textcnn_init_normal \
+python3 -m train.train --model textcnn --exp_name textcnn_init_normal \
   --batch_size 64 --learning_rate 1e-3 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --num_filters 100 --filter_sizes 3 4 5 --init_method normal
@@ -35,22 +35,22 @@ python -m train.train --model textcnn --exp_name textcnn_init_normal \
 # =========================
 # RNN-LSTM init
 # =========================
-python -m train.train --model rnn_lstm --exp_name rnn_init_default \
+python3 -m train.train --model rnn_lstm --exp_name rnn_init_default \
   --batch_size 32 --learning_rate 5e-4 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --hidden_size 128 --num_layers 1 --bidirectional true --init_method default
 
-python -m train.train --model rnn_lstm --exp_name rnn_init_xavier \
+python3 -m train.train --model rnn_lstm --exp_name rnn_init_xavier \
   --batch_size 32 --learning_rate 5e-4 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --hidden_size 128 --num_layers 1 --bidirectional true --init_method xavier
 
-python -m train.train --model rnn_lstm --exp_name rnn_init_orthogonal \
+python3 -m train.train --model rnn_lstm --exp_name rnn_init_orthogonal \
   --batch_size 32 --learning_rate 5e-4 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --hidden_size 128 --num_layers 1 --bidirectional true --init_method orthogonal
 
-python -m train.train --model rnn_lstm --exp_name rnn_init_normal \
+python3 -m train.train --model rnn_lstm --exp_name rnn_init_normal \
   --batch_size 32 --learning_rate 5e-4 --dropout 0.5 --weight_decay 1e-4 \
   --max_len 60 --epochs 15 --patience 3 \
   --hidden_size 128 --num_layers 1 --bidirectional true --init_method normal

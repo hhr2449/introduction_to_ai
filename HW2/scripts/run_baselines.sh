@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-python -m train.train --model mlp --exp_name mlp_base
+python3 -m train.train --model mlp --exp_name mlp_base
 
-python -m train.train --model textcnn --exp_name textcnn_base \
+python3 -m train.train --model textcnn --exp_name textcnn_base \
   --batch_size 64 \
   --learning_rate 1e-3 \
   --dropout 0.5 \
@@ -15,7 +15,7 @@ python -m train.train --model textcnn --exp_name textcnn_base \
   --filter_sizes 3 4 5 \
   --init_method default
 
-python -m train.train --model rnn_lstm --exp_name rnn_base \
+python3 -m train.train --model rnn_lstm --exp_name rnn_base \
   --batch_size 32 \
   --learning_rate 5e-4 \
   --dropout 0.5 \

@@ -1,15 +1,11 @@
-# mlp的参数设置
 from .base_config import *
 
-MODEL_NAME = "mlp"
+MODEL_NAME = "mlp_4layers"
 
-# MLP结构参数
-MLP_HIDDEN_SIZE = 128
-
-# MLP最优默认参数
+# 4层MLP最优默认参数
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-3
-DROPOUT = 0.7
+DROPOUT = 0.5
 WEIGHT_DECAY = 1e-4
 MAX_SENTENCE_LEN = 120
 EPOCHS = 20
@@ -17,4 +13,4 @@ USE_EARLY_STOPPING = True
 PATIENCE = 3
 INIT_METHOD = "default"
 
-CHECKPOINT_PATH = f"{CHECKPOINT_DIR}/mlp_best.pt"
+CHECKPOINT_PATH = f"{CHECKPOINT_DIR}/mlp_4layers_best.pt"

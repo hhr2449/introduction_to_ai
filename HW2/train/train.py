@@ -12,6 +12,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 
 from dataset import get_data_loaders
 from models.mlp import MLP
+from models.mlp_4layers import MLP as MLP4Layers
 from models.cnn import TextCNN
 from models.rnn import RNN_LSTM
 from config.base_config import (
@@ -45,6 +46,7 @@ def override_config_from_args(args, config):
         "MAX_SENTENCE_LEN": args.max_len,
         "EPOCHS": args.epochs,
         "PATIENCE": args.patience,
+        "USE_EARLY_STOPPING": args.use_early_stopping,
     }
     for key, value in common_overrides.items():
         if value is not None:
@@ -196,6 +198,7 @@ def build_experiment_config(args, config):
         "batch_size": config.BATCH_SIZE,
         "max_len": config.MAX_SENTENCE_LEN,
         "patience": config.PATIENCE,
+        "use_early_stopping": config.USE_EARLY_STOPPING,
         "init_method": getattr(config, "INIT_METHOD", "default"),
     }
     if args.model == "textcnn":
@@ -217,7 +220,7 @@ def main():
     # 选择训练参数
     parser = argparse.ArgumentParser()
     # 选择模型
-    parser.add_argument("--model", type=str, required=True, choices=["mlp", "textcnn", "rnn_lstm"])
+    parser.add_argument("--model", type=str, required=True, choices=["mlp", "mlp_4layers", "textcnn", "rnn_lstm"])
     # 实验名称
     parser.add_argument("--exp_name", type=str, required=True)
     parser.add_argument("--batch_size", type=int, default=None)
@@ -227,6 +230,7 @@ def main():
     parser.add_argument("--max_len", type=int, default=None)
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--patience", type=int, default=None)
+    parser.add_argument("--use_early_stopping", type=str2bool, default=None)
     parser.add_argument("--num_filters", type=int, default=None)
     parser.add_argument("--filter_sizes", type=int, nargs="+", default=None)
     parser.add_argument("--hidden_size", type=int, default=None)
@@ -248,6 +252,8 @@ def main():
     # 根据参数来进行模型创建
     if args.model == "mlp":
         import config.mlp_config as config
+    elif args.model == "mlp_4layers":
+        import config.mlp_4layers_config as config
     elif args.model == "textcnn":
         import config.cnn_config as config
     elif args.model == "rnn_lstm":
@@ -279,6 +285,14 @@ def main():
 
     if args.model == "mlp":
         model = MLP(
+            vocab_size=len(word2id),
+            pad_idx=word2id[PAD_TOKEN],
+            embedding_matrix=embedding_matrix,
+            freeze_embedding=False,
+            dropout=config.DROPOUT,
+        ).to(DEVICE)
+    elif args.model == "mlp_4layers":
+        model = MLP4Layers(
             vocab_size=len(word2id),
             pad_idx=word2id[PAD_TOKEN],
             embedding_matrix=embedding_matrix,

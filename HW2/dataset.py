@@ -13,6 +13,8 @@ from config.base_config import (
 import torch
 from torch.utils.data import Dataset, DataLoader
 from gensim.models import KeyedVectors
+from collections import Counter
+from itertools import chain
 
 
 # 用于读取数据集
@@ -20,6 +22,16 @@ from gensim.models import KeyedVectors
 # 返回一个二元组的列表，其中的每个二元组都表示一条训练数据，具体而言是：(label, sentence)
 # sentence是一个列表，列表中的每个元素表示一个单词
 def read_data_from_file(file_path):
+    data_init = []
+    for i in range(1, 10):
+        data_init.append(read_data_from_file(os.path.join(file_path, 'train_' + str(i) + '.txt')))
+        data_init.append(read_data_from_file(os.path.join(file_path, 'valid_' + str(i) + '.txt')))
+        data_init.append(read_data_from_file(os.path.join(file_path, 'test_' + str(i) + '.txt')))
+
+    
+
+
+    
     data = []
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
@@ -41,26 +53,18 @@ def read_data_from_file(file_path):
 # mini_freq表示最小词频，小于该词频的词将被忽略
 #返回一个字典word2id,里面建立的词和id的对应关系
 def build_vocab(data, mini_freq=1):
-    word2id = {}
-    # 初始化: 0 为<pad>表示填充占位符
-    # 1 为<unk>表示未知字符
-    word2id['<PAD>'] = 0
-    word2id['<UNK>'] = 1
-    # 接下来遍历数据集，开始统计词频
-    word_freq = {}
-    # 遍历句子
-    for label, sentence in data:
-        # 遍历句子中的单词
-        for word in sentence:
-            # 词频加1
-            word_freq[word] = word_freq.get(word, 0) + 1
-    # 对于词频表中的词，只要满足最小词频要求，则添加到词表中
-    for word, freq in word_freq.items():
-        if freq >= mini_freq:
-            word2id[word] = len(word2id)
-    # 同时构建id到词的映射
+    # 1. 扁平化提取所有词，并使用 Counter 高效统计词频
+    all_words = chain.from_iterable(sentence for _, sentence in data)
+    word_freq = Counter(all_words)
+    
+    # 2. 初始化 word2id 并利用 enumerate 批量分配 ID
+    word2id = {'<PAD>': 0, '<UNK>': 1}
+    valid_words = (word for word, freq in word_freq.items() if freq >= mini_freq)
+    word2id.update({word: i for i, word in enumerate(valid_words, start=2)})
+    
+    # 3. 字典推导式构建反向映射
     id2word = {v: k for k, v in word2id.items()}
-
+    
     return word2id, id2word
 
 # 将数据转换为id表示
@@ -69,20 +73,42 @@ def build_vocab(data, mini_freq=1):
 # 输出一个二元组的列表，其中的每个二元组都表示一条训练数据，具体而言是：(label, sentence_ids)
 # sentence_ids是一个列表，列表中的每个元素表示一个单词的id，长度为MAX_SENTENCE_LEN
 def convert_data_to_id(data, word2id, max_len=MAX_SENTENCE_LEN):
-    data_ids = []
-    pad_id = word2id['<PAD>']
-    unk_id = word2id['<UNK>']
+    result_list = []
+    
+   
+    pad_val = word2id['<PAD>']
+    unk_val = word2id['<UNK>']
 
-    for label, sentence in data:
-        # 先创建一个全都是pad的列表
-        sentence_ids = [pad_id] * max_len
-        # 然后对于sentence中的单词，将其转换为id，并替换列表中的元素
-        limit = min(len(sentence), max_len)
-        for i in range(limit):
-            sentence_ids[i] = word2id.get(sentence[i], unk_id)
-        data_ids.append((label, sentence_ids))
+    for item in data:
+        cur_label = item[0]
+        cur_text = item[1]
+        
+        tmp_ids = []
+        word_count = 0  
+        
+        # 逐个单词处理
+        for word in cur_text:
+            
+            if word_count >= max_len:
+                break
+                
+            
+            if word in word2id.keys():
+                tmp_ids.append(word2id[word])
+            else:
+                tmp_ids.append(unk_val)
+                
+            word_count += 1
+            
+        
+        current_length = len(tmp_ids)
+        while current_length < max_len:
+            tmp_ids.append(pad_val)
+            current_length += 1
+            
+        result_list.append((cur_label, tmp_ids))
 
-    return data_ids
+    return result_list
 
 # 数据集类,继承torch.utils.data.Dataset
 class SentimentDataset(Dataset):
